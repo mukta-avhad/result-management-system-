@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin Dashboard — {{ college_short }}</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--navy:#0f1b35;--blue:#1a3a6b;--gold:#e8b84b;--red:#e74c3c;--green:#27ae60}
+body{font-family:'DM Sans',sans-serif;background:#f0f4ff;min-height:100vh}
+nav{background:var(--navy);height:64px;padding:0 36px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 14px rgba(0,0,0,.2)}
+.nb{color:#fff;font-family:'Playfair Display',serif;font-size:19px}.nb span{color:var(--gold)}
+.nr{display:flex;gap:10px;align-items:center}
+.nl{color:#fff;text-decoration:none;padding:7px 14px;background:rgba(255,255,255,.1);border-radius:8px;font-size:13px;font-weight:500;transition:.15s}
+.nl:hover{background:rgba(255,255,255,.2)}
+.nl.red{background:rgba(231,76,60,.3)}.nl.red:hover{background:rgba(231,76,60,.5)}
+.nl.gold{background:rgba(232,184,75,.2)}.nl.gold:hover{background:rgba(232,184,75,.35)}
+.container{max-width:1200px;margin:0 auto;padding:36px 20px}
+.page-head{margin-bottom:28px}
+.page-head h1{font-family:'Playfair Display',serif;font-size:30px;color:var(--navy)}
+.page-head p{color:#888;margin-top:4px;font-size:14px}
+.badge-role{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;background:#e3f2fd;color:#1a4f8b;margin-left:8px;vertical-align:middle}
+/* Stats */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:32px}
+.stat{background:#fff;border-radius:14px;padding:22px 20px;box-shadow:0 2px 10px rgba(0,0,0,.06);display:flex;align-items:center;gap:14px;border-left:4px solid transparent}
+.stat.s1{border-color:#1a4f8b}.stat.s2{border-color:var(--gold)}.stat.s3{border-color:var(--green)}.stat.s4{border-color:var(--red)}
+.stat-icon{font-size:30px}
+.stat-val{font-size:26px;font-weight:700;color:var(--navy)}
+.stat-lbl{font-size:12px;color:#999;margin-top:2px}
+/* Grade summary */
+.grade-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:32px}
+.gb{background:#fff;border-radius:12px;padding:16px 18px;box-shadow:0 2px 8px rgba(0,0,0,.05);text-align:center}
+.gb-val{font-size:28px;font-weight:700}
+.gb-lbl{font-size:12px;color:#888;margin-top:3px}
+/* Cards grid */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px}
+.card{background:#fff;border-radius:16px;box-shadow:0 4px 16px rgba(0,0,0,.07);overflow:hidden}
+.card-head{padding:18px 22px;border-bottom:2px solid #f0f4ff;display:flex;justify-content:space-between;align-items:center}
+.card-head h2{font-family:'Playfair Display',serif;font-size:20px;color:var(--navy)}
+.btn{padding:8px 16px;border:none;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;text-decoration:none;display:inline-block;transition:.15s}
+.btn-sm{padding:5px 12px;font-size:12px}
+.btn-primary{background:var(--navy);color:#fff}.btn-primary:hover{background:var(--blue)}
+.btn-gold{background:var(--gold);color:var(--navy)}.btn-gold:hover{opacity:.9}
+.btn-edit{background:#e3f2fd;color:#1565c0}.btn-edit:hover{background:#bbdefb}
+.btn-del{background:#fdecea;color:var(--red);border:none;cursor:pointer;font-family:'DM Sans',sans-serif;transition:.15s}.btn-del:hover{background:#f5c6cb}
+table{width:100%;border-collapse:collapse}
+thead th{padding:10px 16px;text-align:left;font-size:11px;font-weight:700;color:#999;letter-spacing:.8px;text-transform:uppercase;background:#f8faff}
+tbody tr{border-bottom:1px solid #f0f0f0}
+tbody tr:hover{background:#f8f9ff}
+tbody td{padding:12px 16px;font-size:13px;color:#333}
+.flash{padding:11px 16px;border-radius:10px;margin-bottom:20px;font-size:13px;font-weight:500}
+.flash-success{background:#d4edda;color:var(--green);border:1px solid #c3e6cb}
+.flash-error{background:#fdecea;color:var(--red);border:1px solid #f5c6cb}
+/* Notice cards */
+.notice-item{padding:14px 22px;border-bottom:1px solid #f0f4ff}
+.notice-item:last-child{border:none}
+.notice-title{font-weight:600;color:var(--navy);font-size:14px}
+.notice-meta{font-size:11px;color:#aaa;margin-top:3px}
+.view-all{display:block;text-align:center;padding:12px;color:var(--blue);text-decoration:none;font-size:13px;font-weight:600;border-top:2px solid #f0f4ff}
+.view-all:hover{background:#f8f9ff}
+</style>
+</head>
+<body>
+<nav>
+  <div class="nb">🎓 <span>SSJCOE</span> Admin</div>
+  <div class="nr">
+    <span style="color:rgba(255,255,255,.65);font-size:13px">🛡️ {{ session.user_name }}</span>
+    <a href="/admin/teachers" class="nl">👨‍🏫 Teachers</a>
+    <a href="/admin/students" class="nl">👥 Students</a>
+    <a href="/admin/results" class="nl">📊 Results</a>
+    <a href="/admin/notices" class="nl gold">📋 Notices</a>
+    <a href="/logout" class="nl red">Logout</a>
+  </div>
+</nav>
+<div class="container">
+  <div class="page-head">
+    <h1>Admin Dashboard <span class="badge-role">Administrator</span></h1>
+    <p>{{ college }} — Full System Control</p>
+  </div>
+  {% with msgs=get_flashed_messages(with_categories=true) %}{% for c,m in msgs %}
+    <div class="flash flash-{{c}}">{{m}}</div>{% endfor %}{% endwith %}
+
+  <div class="stats">
+    <div class="stat s1"><div class="stat-icon">👨‍🏫</div><div><div class="stat-val">{{ teachers|length }}</div><div class="stat-lbl">Teachers</div></div></div>
+    <div class="stat s2"><div class="stat-icon">👥</div><div><div class="stat-val">{{ students|length }}</div><div class="stat-lbl">Students</div></div></div>
+    <div class="stat s3"><div class="stat-icon">✅</div><div><div class="stat-val">{{ stats.get('Distinction',0) + stats.get('First Class',0) + stats.get('Pass Class',0) }}</div><div class="stat-lbl">Passed Students</div></div></div>
+    <div class="stat s4"><div class="stat-icon">❌</div><div><div class="stat-val">{{ stats.get('Fail',0) }}</div><div class="stat-lbl">Failed Students</div></div></div>
+  </div>
+
+  <div class="grade-bar">
+    <div class="gb"><div class="gb-val" style="color:#1a6b3c">{{ stats.get('Distinction',0) }}</div><div class="gb-lbl">🏆 Distinction</div></div>
+    <div class="gb"><div class="gb-val" style="color:#1a4f8b">{{ stats.get('First Class',0) }}</div><div class="gb-lbl">⭐ First Class</div></div>
+    <div class="gb"><div class="gb-val" style="color:#7a5c00">{{ stats.get('Pass Class',0) }}</div><div class="gb-lbl">✓ Pass Class</div></div>
+    <div class="gb"><div class="gb-val" style="color:#c0392b">{{ stats.get('Fail',0) }}</div><div class="gb-lbl">✗ Fail</div></div>
+  </div>
+
+  <div class="grid2">
+    <!-- Recent Teachers -->
+    <div class="card">
+      <div class="card-head">
+        <h2>👨‍🏫 Teachers</h2>
+        <a href="/admin/teachers" class="btn btn-primary btn-sm">Manage All</a>
+      </div>
+      <table>
+        <thead><tr><th>Name</th><th>Username</th><th>Department</th></tr></thead>
+        <tbody>
+          {% for t in teachers[:5] %}
+          <tr><td><strong>{{ t.name }}</strong></td><td style="color:#888">{{ t.username }}</td><td>{{ t.department or '—' }}</td></tr>
+          {% else %}<tr><td colspan="3" style="text-align:center;color:#bbb;padding:20px">No teachers yet</td></tr>{% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <!-- Recent Students -->
+    <div class="card">
+      <div class="card-head">
+        <h2>👥 Recent Students</h2>
+        <a href="/admin/students" class="btn btn-primary btn-sm">Manage All</a>
+      </div>
+      <table>
+        <thead><tr><th>Name</th><th>Roll No</th><th>Branch</th></tr></thead>
+        <tbody>
+          {% for s in students[:5] %}
+          <tr><td><strong>{{ s.name }}</strong></td><td style="color:#888">{{ s.roll_number }}</td><td>{{ s.branch }}</td></tr>
+          {% else %}<tr><td colspan="3" style="text-align:center;color:#bbb;padding:20px">No students yet</td></tr>{% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Notices -->
+  <div class="card">
+    <div class="card-head">
+      <h2>📋 Recent Notices</h2>
+      <a href="/admin/notices" class="btn btn-gold btn-sm">Manage Notices</a>
+    </div>
+    {% for n in notices %}
+    <div class="notice-item">
+      <div class="notice-title">{{ n.title }}</div>
+      <div class="notice-meta">Posted by {{ n.posted_by }} · {{ n.created_at }}</div>
+    </div>
+    {% else %}
+    <div style="text-align:center;padding:30px;color:#bbb">No notices yet</div>
+    {% endfor %}
+    <a href="/admin/notices" class="view-all">View all notices →</a>
+  </div>
+</div>
+</body></html>

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>All Results — SSJCOE</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--navy:#0f1b35;--blue:#1a3a6b;--gold:#e8b84b}
+body{font-family:'DM Sans',sans-serif;background:#f0f4ff;min-height:100vh}
+nav{background:var(--navy);height:64px;padding:0 36px;display:flex;align-items:center;justify-content:space-between}
+.nb{color:#fff;font-family:'Playfair Display',serif;font-size:19px}.nb span{color:var(--gold)}
+.nr{display:flex;gap:10px}
+.nl{color:#fff;text-decoration:none;padding:7px 14px;background:rgba(255,255,255,.1);border-radius:8px;font-size:13px}
+.nl:hover{background:rgba(255,255,255,.2)}.nl.red{background:rgba(231,76,60,.3)}
+.container{max-width:1100px;margin:0 auto;padding:36px 20px}
+h1{font-family:'Playfair Display',serif;font-size:30px;color:var(--navy);margin-bottom:4px}
+.sub{color:#888;font-size:14px;margin-bottom:28px}
+.legend{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:20px}
+.li{display:flex;align-items:center;gap:7px;background:#fff;border-radius:9px;padding:9px 14px;box-shadow:0 2px 6px rgba(0,0,0,.05);font-size:13px;font-weight:600}
+.dot{width:11px;height:11px;border-radius:50%}
+.card{background:#fff;border-radius:16px;box-shadow:0 4px 16px rgba(0,0,0,.07);overflow:hidden}
+.card-head{padding:18px 22px;border-bottom:2px solid #f0f4ff;display:flex;justify-content:space-between;align-items:center}
+.card-head h2{font-family:'Playfair Display',serif;font-size:20px;color:var(--navy)}
+.search{padding:8px 13px;border:2px solid #e0e8ff;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:220px}
+.search:focus{border-color:var(--blue)}
+table{width:100%;border-collapse:collapse}
+thead th{padding:10px 20px;text-align:left;font-size:11px;font-weight:700;color:#999;letter-spacing:.8px;text-transform:uppercase;background:#f8faff}
+tbody tr{border-bottom:1px solid #f0f0f0}tbody tr:hover{background:#f8f9ff}
+tbody td{padding:13px 20px;font-size:13px;color:#333}
+.grade-pill{padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700}
+.pct-bar{display:flex;align-items:center;gap:10px}
+.bar-bg{background:#f0f0f0;border-radius:20px;height:8px;flex:1;overflow:hidden;min-width:80px}
+.bar-fill{height:100%;border-radius:20px}
+.vl{color:var(--blue);text-decoration:none;font-size:12px;font-weight:600}
+.vl:hover{text-decoration:underline}
+.empty{text-align:center;padding:40px;color:#bbb}
+</style>
+</head>
+<body>
+<nav>
+  <div class="nb">🎓 <span>SSJCOE</span> Results</div>
+  <div class="nr">
+    {% if role == 'admin' %}
+    <a href="/admin/dashboard" class="nl">← Dashboard</a>
+    <a href="/logout" class="nl red">Logout</a>
+    {% else %}
+    <a href="/teacher/dashboard" class="nl">← Dashboard</a>
+    <a href="/logout" class="nl red">Logout</a>
+    {% endif %}
+  </div>
+</nav>
+<div class="container">
+  <h1>📊 All Student Results</h1>
+  <p class="sub">{{ college }} — Complete results overview</p>
+
+  <div class="legend">
+    <div class="li"><div class="dot" style="background:#27ae60"></div>Distinction (≥75%)</div>
+    <div class="li"><div class="dot" style="background:#2980b9"></div>First Class (≥60%)</div>
+    <div class="li"><div class="dot" style="background:#f39c12"></div>Pass Class (≥40%)</div>
+    <div class="li"><div class="dot" style="background:#e74c3c"></div>Fail (&lt;40%)</div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2>Students ({{ summaries|length }})</h2>
+      <input type="text" class="search" placeholder="🔍 Search..." onkeyup="filterTable(this)">
+    </div>
+    {% if summaries %}
+    <table id="tbl">
+      <thead><tr><th>#</th><th>Roll No</th><th>Name</th><th>Branch</th><th>Sem</th><th>Percentage</th><th>Grade</th><th></th></tr></thead>
+      <tbody>
+        {% for s in summaries %}
+        {% set bc={'Distinction':'#27ae60','First Class':'#2980b9','Pass Class':'#f39c12','Fail':'#e74c3c','N/A':'#ccc'}.get(s.grade,'#ccc') %}
+        {% set bg={'Distinction':'#d4edda','First Class':'#cce5ff','Pass Class':'#fff3cd','Fail':'#fdecea','N/A':'#f0f0f0'}.get(s.grade,'#f0f0f0') %}
+        <tr>
+          <td>{{ loop.index }}</td>
+          <td><strong>{{ s.roll }}</strong></td>
+          <td>{{ s.name }}</td>
+          <td>{{ s.branch }}</td>
+          <td>Sem {{ s.semester }}</td>
+          <td>
+            <div class="pct-bar">
+              <div class="bar-bg"><div class="bar-fill" style="width:{{ s.percentage }}%;background:{{ bc }}"></div></div>
+              <span style="font-weight:700;color:{{ s.grade_color }};min-width:42px">{{ s.percentage }}%</span>
+            </div>
+          </td>
+          <td><span class="grade-pill" style="background:{{ bg }};color:{{ s.grade_color }}">{{ s.grade }}</span></td>
+          <td>
+            {% if role == 'admin' %}
+            <a href="/teacher/result/{{ s.id }}" class="vl">View →</a>
+            {% else %}
+            <a href="/teacher/result/{{ s.id }}" class="vl">View →</a>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="empty">No results available yet</div>
+    {% endif %}
+  </div>
+</div>
+<script>function filterTable(el){const q=el.value.toLowerCase();document.querySelectorAll('#tbl tbody tr').forEach(r=>r.style.display=r.textContent.toLowerCase().includes(q)?'':'none')}</script>
+</body></html>

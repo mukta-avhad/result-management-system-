@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>My Result — {{ college_short }}</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--navy:#0f1b35;--blue:#1a3a6b;--gold:#e8b84b}
+body{font-family:'DM Sans',sans-serif;background:#f0f4ff;min-height:100vh}
+nav{background:var(--navy);height:64px;padding:0 36px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 14px rgba(0,0,0,.2)}
+.nb{color:#fff;font-family:'Playfair Display',serif;font-size:19px}.nb span{color:var(--gold)}
+.nr{display:flex;gap:10px;align-items:center}
+.nl{color:#fff;text-decoration:none;padding:7px 14px;background:rgba(255,255,255,.1);border-radius:8px;font-size:13px;font-weight:500;transition:.15s}
+.nl:hover{background:rgba(255,255,255,.2)}.nl.red{background:rgba(231,76,60,.3)}.nl.gold{background:rgba(232,184,75,.25)}
+.container{max-width:1200px;margin:0 auto;padding:36px 20px;display:grid;grid-template-columns:1fr 340px;gap:24px}
+.full{grid-column:1/-1}
+/* Result Header */
+.result-header{background:var(--navy);border-radius:18px;padding:28px 30px;color:#fff;display:grid;grid-template-columns:1fr auto;gap:20px;align-items:center;margin-bottom:20px}
+.student-name{font-family:'Playfair Display',serif;font-size:26px;margin-bottom:6px}
+.student-meta{color:rgba(255,255,255,.6);font-size:13px;line-height:1.9}
+.grade-badge{background:rgba(255,255,255,.1);border-radius:14px;padding:18px 24px;text-align:center;min-width:150px}
+.grade-icon{font-size:32px;margin-bottom:6px}
+.grade-name{font-size:18px;font-weight:700}
+.grade-pct{font-size:13px;color:rgba(255,255,255,.65);margin-top:3px}
+/* Summary */
+.summary-row{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px}
+.sum{background:#fff;border-radius:12px;padding:18px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.sum-val{font-size:24px;font-weight:700;color:var(--navy)}
+.sum-lbl{font-size:12px;color:#aaa;margin-top:4px}
+/* Subjects table */
+.card{background:#fff;border-radius:16px;box-shadow:0 4px 16px rgba(0,0,0,.07);overflow:hidden;margin-bottom:20px}
+.card-head{padding:18px 22px;border-bottom:2px solid #f0f4ff}
+.card-head h2{font-family:'Playfair Display',serif;font-size:20px;color:var(--navy)}
+table{width:100%;border-collapse:collapse}
+thead th{padding:10px 20px;text-align:left;font-size:11px;font-weight:700;color:#999;letter-spacing:.8px;text-transform:uppercase;background:#f8faff}
+tbody tr{border-bottom:1px solid #f0f0f0}tbody tr:last-child{border:none}tbody tr:hover{background:#f8f9ff}
+tbody td{padding:14px 20px;font-size:14px;color:#333}
+.subj-name{font-weight:600;color:var(--navy)}
+.prog-bar{background:#f0f0f0;border-radius:20px;height:8px;overflow:hidden;min-width:80px}
+.prog-fill{height:100%;border-radius:20px}
+.grade-chip{padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700}
+/* Download button */
+.dl-btn{display:inline-flex;align-items:center;gap:8px;padding:13px 24px;background:var(--gold);color:var(--navy);border:none;border-radius:11px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;cursor:pointer;text-decoration:none;transition:.2s;box-shadow:0 4px 12px rgba(232,184,75,.35)}
+.dl-btn:hover{opacity:.9;transform:translateY(-1px)}
+/* Sidebar: Notices */
+.notice-card{background:#fff;border-radius:14px;box-shadow:0 4px 16px rgba(0,0,0,.07);overflow:hidden;margin-bottom:14px}
+.notice-card-head{padding:16px 18px;border-bottom:2px solid #f0f4ff}
+.notice-card-head h3{font-family:'Playfair Display',serif;font-size:18px;color:var(--navy)}
+.notice-item{padding:13px 18px;border-bottom:1px solid #f0f4ff}
+.notice-item:last-child{border:none}
+.n-title{font-weight:600;color:var(--navy);font-size:13px;margin-bottom:5px}
+.n-body{font-size:12px;color:#666;line-height:1.55;white-space:pre-wrap;max-height:70px;overflow:hidden}
+.n-meta{font-size:11px;color:#bbb;margin-top:6px}
+.tag{display:inline-block;padding:1px 7px;border-radius:20px;font-size:10px;font-weight:700}
+.tag-admin{background:#fef3cd;color:#856404}.tag-teacher{background:#cce5ff;color:#004085}
+.empty{text-align:center;padding:30px;color:#bbb;font-size:13px}
+.no-marks{text-align:center;padding:50px}
+.no-marks div{font-size:40px;margin-bottom:12px}
+</style>
+</head>
+<body>
+<nav>
+  <div class="nb">🎓 <span>SSJCOE</span> Results</div>
+  <div class="nr">
+    <span style="color:rgba(255,255,255,.65);font-size:13px">🎒 {{ student.name }}</span>
+    {% if results %}
+    <a href="/student/download_pdf" class="nl gold">⬇️ Download PDF</a>
+    {% endif %}
+    <a href="/logout" class="nl red">Logout</a>
+  </div>
+</nav>
+
+<div class="container">
+  <!-- Result section -->
+  <div>
+    <div class="result-header">
+      <div>
+        <div class="student-name">{{ student.name }}</div>
+        <div class="student-meta">
+          📋 Roll No: <strong>{{ student.roll_number }}</strong><br>
+          🏫 {{ student.branch }} · Semester {{ student.semester }}<br>
+          📅 Academic Year: {{ student.academic_year }}
+        </div>
+      </div>
+      <div class="grade-badge">
+        <div class="grade-icon">{{ grade_icon }}</div>
+        <div class="grade-name">{{ overall_grade }}</div>
+        <div class="grade-pct">{{ overall_percentage }}%</div>
+      </div>
+    </div>
+
+    {% if results %}
+    <div class="summary-row">
+      <div class="sum"><div class="sum-val">{{ total_obtained }}</div><div class="sum-lbl">Marks Obtained</div></div>
+      <div class="sum"><div class="sum-val">{{ total_max }}</div><div class="sum-lbl">Total Marks</div></div>
+      <div class="sum"><div class="sum-val" style="color:{{ grade_color }}">{{ overall_percentage }}%</div><div class="sum-lbl">Overall Percentage</div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h2>📚 Subject-wise Results</h2></div>
+      <table>
+        <thead><tr><th>Subject</th><th>Code</th><th>Marks</th><th>Progress</th><th>Grade</th></tr></thead>
+        <tbody>
+          {% for r in results %}
+          {% set bc={'Distinction':'#27ae60','First Class':'#2980b9','Pass Class':'#f39c12','Fail':'#e74c3c'}.get(r.grade,'#888') %}
+          {% set bg={'Distinction':'#d4edda','First Class':'#cce5ff','Pass Class':'#fff3cd','Fail':'#fdecea'}.get(r.grade,'#f0f0f0') %}
+          <tr>
+            <td class="subj-name">{{ r.subject }}</td>
+            <td style="color:#aaa;font-size:12px">{{ r.code }}</td>
+            <td><strong>{{ r.obtained }}</strong><span style="color:#aaa"> / {{ r.max }}</span></td>
+            <td><div class="prog-bar"><div class="prog-fill" style="width:{{ r.percentage }}%;background:{{ bc }}"></div></div></td>
+            <td><span class="grade-chip" style="background:{{ bg }};color:{{ r.grade_color }}">{{ r.grade }}</span></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <a href="/student/download_pdf" class="dl-btn">⬇️ Download My Result Card (PDF)</a>
+    <div style="font-size:12px;color:#aaa;margin-top:8px">Grade: Distinction ≥75% · First Class ≥60% · Pass Class ≥40% · Fail &lt;40%</div>
+
+    {% else %}
+    <div class="card">
+      <div class="no-marks"><div>📭</div><p style="color:#aaa">Your results have not been published yet.<br>Please check back later.</p></div>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Sidebar: Notice Board -->
+  <div>
+    <div class="notice-card">
+      <div class="notice-card-head"><h3>📋 Notice Board</h3></div>
+      {% if notices %}
+        {% for n in notices %}
+        <div class="notice-item">
+          <div class="n-title">{{ n.title }}</div>
+          <div class="n-body">{{ n.content }}</div>
+          <div class="n-meta">
+            <span class="tag tag-{{ n.role }}">{{ n.role|upper }}</span>
+            {{ n.posted_by }} · {{ n.created_at }}
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="empty">No notices posted yet</div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+</body></html>

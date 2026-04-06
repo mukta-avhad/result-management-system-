@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Enter Marks — SSJCOE</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--navy:#0f1b35;--blue:#1a3a6b;--gold:#e8b84b}
+body{font-family:'DM Sans',sans-serif;background:#f0f4ff;min-height:100vh}
+nav{background:var(--navy);height:64px;padding:0 36px;display:flex;align-items:center;justify-content:space-between}
+.nb{color:#fff;font-family:'Playfair Display',serif;font-size:19px}.nb span{color:var(--gold)}
+.nl{color:#fff;text-decoration:none;padding:7px 14px;background:rgba(255,255,255,.1);border-radius:8px;font-size:13px}
+.nl:hover{background:rgba(255,255,255,.2)}
+.container{max-width:700px;margin:0 auto;padding:36px 20px}
+.back{color:#888;text-decoration:none;font-size:14px;display:inline-block;margin-bottom:22px}
+.student-banner{background:var(--navy);border-radius:14px;padding:22px 26px;color:#fff;margin-bottom:24px;display:flex;align-items:center;gap:16px}
+.avatar{width:52px;height:52px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.s-name{font-family:'Playfair Display',serif;font-size:19px}
+.s-meta{font-size:13px;color:rgba(255,255,255,.6);margin-top:3px}
+.marks-card{background:#fff;border-radius:18px;padding:30px;box-shadow:0 4px 20px rgba(0,0,0,.08)}
+.marks-card h2{font-family:'Playfair Display',serif;font-size:22px;color:var(--navy);margin-bottom:22px}
+.subj-row{display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid #f0f0f0}
+.subj-row:last-of-type{border-bottom:none}
+.subj-ico{width:40px;height:40px;background:#f0f4ff;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.subj-info{flex:1}
+.subj-name{font-weight:600;color:var(--navy);font-size:14px}
+.subj-code{font-size:11px;color:#bbb}
+.input-wrap{position:relative}
+.input-wrap input{width:96px;padding:9px 38px 9px 12px;border:2px solid #e0e8ff;border-radius:9px;font-size:15px;font-weight:600;color:var(--navy);font-family:'DM Sans',sans-serif;outline:none;text-align:center;transition:.2s}
+.input-wrap input:focus{border-color:var(--blue)}
+.max-lbl{position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:10px;color:#bbb;white-space:nowrap}
+.live-grade{width:104px;text-align:center;font-size:12px;font-weight:700;padding:5px 8px;border-radius:20px;background:#f0f0f0;color:#888;transition:.2s}
+.btn-row{display:flex;gap:12px;margin-top:24px}
+.btn{padding:12px 24px;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;text-decoration:none;display:inline-block;transition:.2s}
+.btn-primary{background:var(--navy);color:#fff;flex:1}.btn-primary:hover{background:var(--blue)}
+.btn-outline{background:#fff;color:var(--navy);border:2px solid #e0e8ff}.btn-outline:hover{border-color:var(--navy)}
+.flash{padding:11px 16px;border-radius:10px;margin-bottom:20px;font-size:13px;font-weight:500}
+.flash-success{background:#d4edda;color:#27ae60;border:1px solid #c3e6cb}
+.no-subj{text-align:center;padding:40px;color:#aaa}
+</style>
+</head>
+<body>
+<nav>
+  <div class="nb">🎓 <span>SSJCOE</span> Results</div>
+  <a href="/teacher/dashboard" class="nl">← Dashboard</a>
+</nav>
+<div class="container">
+  <a href="/teacher/dashboard" class="back">← Back to Dashboard</a>
+  <div class="student-banner">
+    <div class="avatar">👤</div>
+    <div>
+      <div class="s-name">{{ student.name }}</div>
+      <div class="s-meta">{{ student.roll_number }} · {{ student.branch }} · Sem {{ student.semester }} · {{ student.academic_year }}</div>
+    </div>
+  </div>
+  {% with msgs=get_flashed_messages(with_categories=true) %}{% for c,m in msgs %}
+    <div class="flash flash-{{c}}">{{m}}</div>{% endfor %}{% endwith %}
+  <div class="marks-card">
+    <h2>✏️ Enter / Edit Marks</h2>
+    {% if subjects %}
+    <form method="POST">
+      {% set icons=['📐','🔬','⚗️','📝','💻','📊','🏗️','⚙️','📡','🧮'] %}
+      {% for subj in subjects %}
+      <div class="subj-row">
+        <div class="subj-ico">{{ icons[loop.index0 % icons|length] }}</div>
+        <div class="subj-info">
+          <div class="subj-name">{{ subj.name }}</div>
+          <div class="subj-code">{{ subj.code }}</div>
+        </div>
+        <div class="input-wrap">
+          <input type="number" name="marks_{{ subj.id }}" min="0" max="{{ subj.max_marks }}" step="0.5"
+                 value="{{ existing.get(subj.id, '') }}"
+                 oninput="liveGrade(this, {{ subj.max_marks }}, 'g{{ subj.id }}')" placeholder="0">
+          <span class="max-lbl">/ {{ subj.max_marks }}</span>
+        </div>
+        <div class="live-grade" id="g{{ subj.id }}">—</div>
+      </div>
+      {% endfor %}
+      <div class="btn-row">
+        <a href="/teacher/dashboard" class="btn btn-outline">Cancel</a>
+        <button type="submit" class="btn btn-primary">💾 Save Marks</button>
+      </div>
+    </form>
+    {% else %}
+    <div class="no-subj">No subjects found for {{ student.branch }} Sem {{ student.semester }}.<br><a href="/teacher/subjects" style="color:var(--blue);font-weight:600">Add subjects →</a></div>
+    {% endif %}
+  </div>
+</div>
+<script>
+const grades=[{min:75,l:'Distinction',bg:'#d4edda',c:'#1a6b3c'},{min:60,l:'First Class',bg:'#cce5ff',c:'#1a4f8b'},{min:40,l:'Pass Class',bg:'#fff3cd',c:'#7a5c00'},{min:0,l:'Fail',bg:'#fdecea',c:'#c0392b'}];
+function liveGrade(inp, max, id){
+  const el=document.getElementById(id), v=parseFloat(inp.value);
+  if(isNaN(v)||inp.value===''){el.textContent='—';el.style.background='#f0f0f0';el.style.color='#888';return}
+  const pct=(v/max)*100, g=grades.find(x=>pct>=x.min);
+  el.textContent=g.l;el.style.background=g.bg;el.style.color=g.c;
+}
+{% for subj in subjects %}{% if subj.id in existing %}
+liveGrade({value:'{{ existing[subj.id] }}'},{{ subj.max_marks }},'g{{ subj.id }}');{% endif %}{% endfor %}
+</script>
+</body></html>

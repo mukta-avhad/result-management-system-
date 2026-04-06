@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Manage Teachers — {{ college_short if college_short else 'SSJCOE' }}</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--navy:#0f1b35;--blue:#1a3a6b;--gold:#e8b84b}
+body{font-family:'DM Sans',sans-serif;background:#f0f4ff;min-height:100vh}
+nav{background:var(--navy);height:64px;padding:0 36px;display:flex;align-items:center;justify-content:space-between}
+.nb{color:#fff;font-family:'Playfair Display',serif;font-size:19px}.nb span{color:var(--gold)}
+.nl{color:#fff;text-decoration:none;padding:7px 14px;background:rgba(255,255,255,.1);border-radius:8px;font-size:13px}
+.nl:hover{background:rgba(255,255,255,.2)}.nl.red{background:rgba(231,76,60,.3)}
+.container{max-width:1200px;margin:0 auto;padding:36px 20px;display:grid;grid-template-columns:1fr 380px;gap:28px}
+.full{grid-column:1/-1}
+h1{font-family:'Playfair Display',serif;font-size:30px;color:var(--navy)}
+.sub{color:#888;margin-top:4px;font-size:14px;margin-bottom:0}
+.card{background:#fff;border-radius:16px;box-shadow:0 4px 16px rgba(0,0,0,.07);overflow:hidden}
+.card-head{padding:18px 22px;border-bottom:2px solid #f0f4ff;display:flex;justify-content:space-between;align-items:center}
+.card-head h2{font-family:'Playfair Display',serif;font-size:20px;color:var(--navy)}
+.add-card{background:#fff;border-radius:16px;padding:28px;box-shadow:0 4px 16px rgba(0,0,0,.07);height:fit-content;position:sticky;top:20px}
+.add-card h2{font-family:'Playfair Display',serif;font-size:22px;color:var(--navy);margin-bottom:20px}
+table{width:100%;border-collapse:collapse}
+thead th{padding:10px 18px;text-align:left;font-size:11px;font-weight:700;color:#999;letter-spacing:.8px;text-transform:uppercase;background:#f8faff}
+tbody tr{border-bottom:1px solid #f0f0f0}tbody tr:hover{background:#f8f9ff}
+tbody td{padding:13px 18px;font-size:13px;color:#333}
+.form-group{margin-bottom:16px}
+label{display:block;font-size:11px;font-weight:700;color:var(--navy);margin-bottom:7px;letter-spacing:.8px;text-transform:uppercase}
+input,select{width:100%;padding:10px 13px;border:2px solid #e0e8ff;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--navy);outline:none;transition:.2s;background:#fff}
+input:focus,select:focus{border-color:var(--blue)}
+.btn{padding:8px 16px;border:none;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;text-decoration:none;display:inline-block;transition:.15s}
+.btn-sm{padding:5px 11px;font-size:12px}
+.btn-primary{background:var(--navy);color:#fff}.btn-primary:hover{background:var(--blue)}
+.btn-submit{width:100%;padding:12px;background:var(--navy);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:.2s;margin-top:4px}
+.btn-submit:hover{background:var(--blue)}
+.btn-edit{background:#e3f2fd;color:#1565c0}.btn-edit:hover{background:#bbdefb}
+.btn-del{background:#fdecea;color:#c0392b;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;border-radius:9px;padding:5px 11px;font-size:12px;font-weight:600;transition:.15s}.btn-del:hover{background:#f5c6cb}
+.flash{padding:11px 16px;border-radius:10px;margin-bottom:0;font-size:13px;font-weight:500}
+.flash-success{background:#d4edda;color:#27ae60;border:1px solid #c3e6cb}
+.flash-error{background:#fdecea;color:#c0392b;border:1px solid #f5c6cb}
+.act{display:flex;gap:6px}
+.hint-label{font-size:11px;color:#aaa;margin-top:3px}
+</style>
+</head>
+<body>
+<nav>
+  <div class="nb">🎓 <span>SSJCOE</span> Admin</div>
+  <div style="display:flex;gap:10px">
+    <a href="/admin/dashboard" class="nl">← Dashboard</a>
+    <a href="/admin/students" class="nl">👥 Students</a>
+    <a href="/logout" class="nl red">Logout</a>
+  </div>
+</nav>
+<div class="container">
+  <div class="full">
+    <h1>👨‍🏫 Manage Teachers</h1>
+    <p class="sub">Add, edit or remove teacher accounts</p>
+  </div>
+  {% with msgs=get_flashed_messages(with_categories=true) %}{% for c,m in msgs %}
+    <div class="flash flash-{{c}} full">{{m}}</div>{% endfor %}{% endwith %}
+
+  <!-- Teacher Table -->
+  <div class="card">
+    <div class="card-head"><h2>All Teachers ({{ teachers|length }})</h2></div>
+    <table>
+      <thead><tr><th>#</th><th>Name</th><th>Username</th><th>Department</th><th>Actions</th></tr></thead>
+      <tbody>
+        {% for t in teachers %}
+        <tr>
+          <td>{{ loop.index }}</td>
+          <td><strong>{{ t.name }}</strong></td>
+          <td style="color:#888">{{ t.username }}</td>
+          <td>{{ t.department or '—' }}</td>
+          <td>
+            <div class="act">
+              <a href="/admin/edit_teacher/{{ t.id }}" class="btn btn-sm btn-edit">✏️ Edit</a>
+              <form method="POST" action="/admin/delete_teacher/{{ t.id }}" style="display:inline" onsubmit="return confirm('Delete teacher {{ t.name }}?')">
+                <button type="submit" class="btn-del">🗑 Delete</button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="5" style="text-align:center;padding:30px;color:#bbb">No teachers added yet</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Add Teacher Form -->
+  <div class="add-card">
+    <h2>➕ Add Teacher</h2>
+    <form method="POST" action="/admin/add_teacher">
+      <div class="form-group"><label>Full Name</label><input type="text" name="name" placeholder="Prof. Full Name" required></div>
+      <div class="form-group"><label>Username</label><input type="text" name="username" placeholder="e.g. prof_sharma" required></div>
+      <div class="form-group"><label>Department</label>
+        <select name="department">
+          <option value="">Select Department</option>
+          <option>Computer Science</option><option>Electronics</option>
+          <option>Mechanical</option><option>Civil</option>
+          <option>Electrical</option><option>Information Technology</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Password</label><input type="text" name="password" placeholder="Set a password" required>
+        <p class="hint-label">Teacher will use this to login</p></div>
+      <button type="submit" class="btn-submit">Add Teacher</button>
+    </form>
+  </div>
+</div>
+</body></html>

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login — {{ college_short }} RMS</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--navy:#0f1b35;--blue:#1a3a6b;--gold:#e8b84b;--light:#f4f7ff}
+body{font-family:'DM Sans',sans-serif;min-height:100vh;display:flex;background:var(--navy);overflow:hidden}
+.left{flex:1;background:linear-gradient(135deg,#0f1b35 0%,#1a3a6b 50%,#0f1b35 100%);display:flex;flex-direction:column;justify-content:center;align-items:center;padding:60px;position:relative}
+.left::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 30% 70%,rgba(232,184,75,.12) 0%,transparent 60%),radial-gradient(circle at 80% 20%,rgba(255,255,255,.05) 0%,transparent 50%)}
+.emblem{width:90px;height:90px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:38px;margin-bottom:24px;box-shadow:0 0 40px rgba(232,184,75,.4);position:relative;z-index:1}
+.left h1{font-family:'Playfair Display',serif;color:#fff;font-size:32px;text-align:center;line-height:1.25;margin-bottom:10px;position:relative;z-index:1}
+.left h1 span{color:var(--gold)}
+.left p{color:rgba(255,255,255,.55);text-align:center;font-size:14px;max-width:340px;line-height:1.7;position:relative;z-index:1}
+.deco{position:absolute;width:280px;height:280px;border:1px solid rgba(232,184,75,.12);border-radius:50%;bottom:-90px;right:-90px}
+.deco::before{content:'';position:absolute;width:180px;height:180px;border:1px solid rgba(232,184,75,.08);border-radius:50%;top:50px;left:50px}
+.right{width:490px;background:#fff;display:flex;flex-direction:column;justify-content:center;padding:56px 48px}
+.right h2{font-family:'Playfair Display',serif;font-size:26px;color:var(--navy);margin-bottom:6px}
+.right>p{color:#999;font-size:13px;margin-bottom:28px}
+.role-tabs{display:flex;background:var(--light);border-radius:12px;padding:4px;margin-bottom:26px;gap:3px}
+.tab{flex:1;padding:9px 6px;border:none;background:transparent;border-radius:9px;cursor:pointer;font-size:13px;font-family:'DM Sans',sans-serif;font-weight:500;color:#999;transition:.2s;display:flex;align-items:center;justify-content:center;gap:5px}
+.tab.active{background:var(--navy);color:#fff;box-shadow:0 2px 8px rgba(15,27,53,.3)}
+.form-group{margin-bottom:18px}
+label{display:block;font-size:12px;font-weight:700;color:var(--navy);margin-bottom:7px;letter-spacing:.5px}
+input[type=text],input[type=password]{width:100%;padding:12px 15px;border:2px solid #e8eef5;border-radius:10px;font-size:15px;font-family:'DM Sans',sans-serif;color:var(--navy);transition:.2s;outline:none}
+input:focus{border-color:var(--blue)}
+.hint{font-size:11px;color:#bbb;margin-top:4px}
+button[type=submit]{width:100%;padding:13px;background:var(--navy);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;margin-top:6px;transition:.2s}
+button[type=submit]:hover{background:var(--blue);transform:translateY(-1px);box-shadow:0 6px 20px rgba(15,27,53,.25)}
+.flash{padding:11px 15px;border-radius:10px;margin-bottom:18px;font-size:13px;font-weight:500}
+.flash-error{background:#fdecea;color:#e74c3c;border:1px solid #f5c6cb}
+.demo{margin-top:22px;background:var(--light);border-radius:10px;padding:13px 15px;font-size:12px;color:#777;line-height:1.8}
+.demo strong{color:var(--navy)}
+@media(max-width:768px){body{flex-direction:column}.left{padding:36px 24px;min-height:180px}.right{width:100%;padding:36px 24px}}
+</style>
+</head>
+<body>
+<div class="left">
+  <div class="emblem">🎓</div>
+  <h1>{{ college_short }} <span>Result</span> Portal</h1>
+  <p>{{ college }}</p>
+  <div class="deco"></div>
+</div>
+<div class="right">
+  <h2>Sign In</h2>
+  <p>Select your role and enter credentials</p>
+  {% with msgs = get_flashed_messages(with_categories=true) %}{% for c,m in msgs %}
+    <div class="flash flash-{{c}}">{{m}}</div>{% endfor %}{% endwith %}
+  <form method="POST" action="/login">
+    <div class="role-tabs">
+      <button type="button" class="tab" id="tab-admin" onclick="setRole('admin')">🛡️ Admin</button>
+      <button type="button" class="tab active" id="tab-teacher" onclick="setRole('teacher')">👨‍🏫 Teacher</button>
+      <button type="button" class="tab" id="tab-student" onclick="setRole('student')">🎒 Student</button>
+    </div>
+    <input type="hidden" name="role" id="role-input" value="teacher">
+    <div class="form-group">
+      <label id="uLabel">USERNAME</label>
+      <input type="text" name="username" id="uInput" placeholder="Enter username" required>
+      <p class="hint" id="uHint">Teacher username</p>
+    </div>
+    <div class="form-group">
+      <label>PASSWORD</label>
+      <input type="password" name="password" placeholder="Enter password" required>
+    </div>
+    <button type="submit">Sign In →</button>
+  </form>
+  <div class="demo">
+    <strong>🧪 Demo Credentials</strong><br>
+    Admin &nbsp;&nbsp;→ <strong>admin</strong> / <strong>admin123</strong><br>
+    Teacher → <strong>teacher</strong> / <strong>teacher123</strong><br>
+    Student → Roll: <strong>CS2024001</strong> / <strong>CS2024001</strong>
+  </div>
+</div>
+<script>
+const roles={admin:{label:'ADMIN USERNAME',ph:'Enter admin username',hint:'Admin account'},teacher:{label:'USERNAME',ph:'Enter username',hint:'Teacher username'},student:{label:'ROLL NUMBER',ph:'Enter your roll number',hint:'Your college roll number (e.g. CS2024001)'}};
+function setRole(r){document.getElementById('role-input').value=r;['admin','teacher','student'].forEach(x=>document.getElementById('tab-'+x).classList.toggle('active',x===r));const cfg=roles[r];document.getElementById('uLabel').textContent=cfg.label;document.getElementById('uInput').placeholder=cfg.ph;document.getElementById('uHint').textContent=cfg.hint}
+</script>
+</body></html>

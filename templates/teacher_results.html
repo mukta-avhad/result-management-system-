@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Results Analytics — {{ college_short }}</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--navy:#0f1b35;--blue:#1a3a6b;--gold:#e8b84b}
+body{font-family:'DM Sans',sans-serif;background:#f0f4ff;min-height:100vh}
+nav{background:var(--navy);height:64px;padding:0 36px;display:flex;align-items:center;justify-content:space-between}
+.nb{color:#fff;font-family:'Playfair Display',serif;font-size:19px}.nb span{color:var(--gold)}
+.nr{display:flex;gap:10px}
+.nl{color:#fff;text-decoration:none;padding:7px 14px;background:rgba(255,255,255,.1);border-radius:8px;font-size:13px}
+.nl:hover{background:rgba(255,255,255,.2)}.nl.red{background:rgba(231,76,60,.3)}
+.container{max-width:1200px;margin:0 auto;padding:36px 20px}
+h1{font-family:'Playfair Display',serif;font-size:30px;color:var(--navy);margin-bottom:4px}
+.sub{color:#888;font-size:14px;margin-bottom:28px}
+/* Grade Summary */
+.grade-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:28px}
+.gc{background:#fff;border-radius:14px;padding:20px 18px;box-shadow:0 2px 10px rgba(0,0,0,.06);display:flex;align-items:center;gap:14px;border-left:5px solid}
+.gc.d{border-color:#27ae60}.gc.f{border-color:#2980b9}.gc.p{border-color:#f39c12}.gc.x{border-color:#e74c3c}
+.gc-icon{font-size:30px}
+.gc-val{font-size:28px;font-weight:700;color:var(--navy)}
+.gc-lbl{font-size:12px;color:#888;font-weight:600}
+/* Section */
+.section-title{font-family:'Playfair Display',serif;font-size:22px;color:var(--navy);margin-bottom:14px}
+.card{background:#fff;border-radius:16px;box-shadow:0 4px 16px rgba(0,0,0,.07);overflow:hidden;margin-bottom:28px}
+.card-head{padding:18px 22px;border-bottom:2px solid #f0f4ff;display:flex;justify-content:space-between;align-items:center}
+.card-head h2{font-family:'Playfair Display',serif;font-size:20px;color:var(--navy)}
+table{width:100%;border-collapse:collapse}
+thead th{padding:10px 20px;text-align:left;font-size:11px;font-weight:700;color:#999;letter-spacing:.8px;text-transform:uppercase;background:#f8faff}
+tbody tr{border-bottom:1px solid #f0f0f0}tbody tr:hover{background:#f8f9ff}
+tbody td{padding:13px 20px;font-size:13px;color:#333}
+.badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700}
+.badge-cs{background:#e3f2fd;color:#1565c0}.badge-ec{background:#e8f5e9;color:#2e7d32}
+.badge-me{background:#fff3e0;color:#e65100}.badge-it{background:#e0f7fa;color:#006064}
+.grade-pill{padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700}
+.pct-bar{display:flex;align-items:center;gap:10px}
+.bar-bg{background:#f0f0f0;border-radius:20px;height:8px;flex:1;overflow:hidden;min-width:80px}
+.bar-fill{height:100%;border-radius:20px}
+.topper-crown{color:var(--gold);font-size:16px}
+.search{padding:8px 13px;border:2px solid #e0e8ff;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:220px}
+.search:focus{border-color:var(--blue)}
+a.result-link{color:var(--blue);text-decoration:none;font-size:12px;font-weight:600}
+a.result-link:hover{text-decoration:underline}
+</style>
+</head>
+<body>
+<nav>
+  <div class="nb">🎓 <span>SSJCOE</span> Results</div>
+  <div class="nr">
+    <a href="/teacher/dashboard" class="nl">← Dashboard</a>
+    <a href="/teacher/notices" class="nl">📋 Notices</a>
+    <a href="/logout" class="nl red">Logout</a>
+  </div>
+</nav>
+<div class="container">
+  <h1>📊 Results Analytics</h1>
+  <p class="sub">{{ college }} — Subject toppers and grade distribution</p>
+
+  <!-- Grade Distribution -->
+  <div class="grade-row">
+    <div class="gc d"><div class="gc-icon">🏆</div><div><div class="gc-val">{{ grade_counts.Distinction }}</div><div class="gc-lbl">Distinction (≥75%)</div></div></div>
+    <div class="gc f"><div class="gc-icon">⭐</div><div><div class="gc-val">{{ grade_counts['First Class'] }}</div><div class="gc-lbl">First Class (≥60%)</div></div></div>
+    <div class="gc p"><div class="gc-icon">✓</div><div><div class="gc-val">{{ grade_counts['Pass Class'] }}</div><div class="gc-lbl">Pass Class (≥40%)</div></div></div>
+    <div class="gc x"><div class="gc-icon">✗</div><div><div class="gc-val">{{ grade_counts.Fail }}</div><div class="gc-lbl">Fail (&lt;40%)</div></div></div>
+  </div>
+
+  <!-- Subject-wise Toppers -->
+  {% if toppers %}
+  <div class="card">
+    <div class="card-head"><h2>🏆 Subject-wise Toppers</h2></div>
+    <table>
+      <thead><tr><th>Subject</th><th>Code</th><th>Branch</th><th>Sem</th><th>Topper</th><th>Marks</th></tr></thead>
+      <tbody>
+        {% for t in toppers %}
+        <tr>
+          <td><strong>{{ t.subject }}</strong></td>
+          <td style="color:#888">{{ t.code }}</td>
+          <td>{{ t.branch }}</td>
+          <td>Sem {{ t.semester }}</td>
+          <td><span class="topper-crown">👑</span> {{ t.student_name }} <span style="color:#aaa;font-size:12px">({{ t.roll }})</span></td>
+          <td><strong>{{ t.marks }}</strong> / {{ t.max }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+
+  <!-- All Student Results -->
+  <div class="card">
+    <div class="card-head">
+      <h2>📋 All Student Results</h2>
+      <input type="text" class="search" placeholder="🔍 Search..." onkeyup="filterTable(this)">
+    </div>
+    <table id="tbl">
+      <thead><tr><th>#</th><th>Roll No</th><th>Name</th><th>Branch</th><th>Sem</th><th>Percentage</th><th>Grade</th><th></th></tr></thead>
+      <tbody>
+        {% for s in summaries %}
+        {% set bar_color = {'Distinction':'#27ae60','First Class':'#2980b9','Pass Class':'#f39c12','Fail':'#e74c3c','N/A':'#ccc'}.get(s.grade,'#ccc') %}
+        {% set pill_bg = {'Distinction':'#d4edda','First Class':'#cce5ff','Pass Class':'#fff3cd','Fail':'#fdecea','N/A':'#f0f0f0'}.get(s.grade,'#f0f0f0') %}
+        <tr>
+          <td>{{ loop.index }}</td>
+          <td><strong>{{ s.roll }}</strong></td>
+          <td>{{ s.name }}</td>
+          <td>{{ s.branch }}</td>
+          <td>Sem {{ s.semester }}</td>
+          <td>
+            <div class="pct-bar">
+              <div class="bar-bg"><div class="bar-fill" style="width:{{ s.percentage }}%;background:{{ bar_color }}"></div></div>
+              <span style="font-weight:700;color:{{ s.grade_color }};min-width:42px">{{ s.percentage }}%</span>
+            </div>
+          </td>
+          <td><span class="grade-pill" style="background:{{ pill_bg }};color:{{ s.grade_color }}">{{ s.grade }}</span></td>
+          <td><a href="/teacher/result/{{ s.id }}" class="result-link">View →</a></td>
+        </tr>
+        {% else %}
+        <tr><td colspan="8" style="text-align:center;padding:30px;color:#bbb">No results yet</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+<script>function filterTable(el){const q=el.value.toLowerCase();document.querySelectorAll('#tbl tbody tr').forEach(r=>r.style.display=r.textContent.toLowerCase().includes(q)?'':'none')}</script>
+</body></html>

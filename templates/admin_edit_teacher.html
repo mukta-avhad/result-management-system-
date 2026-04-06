@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Edit Teacher — SSJCOE</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--navy:#0f1b35;--blue:#1a3a6b;--gold:#e8b84b}
+body{font-family:'DM Sans',sans-serif;background:#f0f4ff;min-height:100vh}
+nav{background:var(--navy);height:64px;padding:0 36px;display:flex;align-items:center;justify-content:space-between}
+.nb{color:#fff;font-family:'Playfair Display',serif;font-size:19px}.nb span{color:var(--gold)}
+.nl{color:#fff;text-decoration:none;padding:7px 14px;background:rgba(255,255,255,.1);border-radius:8px;font-size:13px}
+.nl:hover{background:rgba(255,255,255,.2)}.nl.red{background:rgba(231,76,60,.3)}
+.container{max-width:560px;margin:0 auto;padding:40px 20px}
+.back{color:#888;text-decoration:none;font-size:14px;display:inline-block;margin-bottom:22px}
+.card{background:#fff;border-radius:18px;padding:36px;box-shadow:0 4px 20px rgba(0,0,0,.08)}
+.card h2{font-family:'Playfair Display',serif;font-size:26px;color:var(--navy);margin-bottom:6px}
+.card p{color:#888;font-size:14px;margin-bottom:28px}
+.form-group{margin-bottom:18px}
+label{display:block;font-size:11px;font-weight:700;color:var(--navy);margin-bottom:7px;letter-spacing:.8px;text-transform:uppercase}
+input,select{width:100%;padding:11px 14px;border:2px solid #e0e8ff;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--navy);outline:none;transition:.2s;background:#fff}
+input:focus,select:focus{border-color:var(--blue)}
+.hint{font-size:11px;color:#aaa;margin-top:4px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.btn-row{display:flex;gap:12px;margin-top:6px}
+.btn{padding:12px 24px;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;text-decoration:none;display:inline-block;transition:.2s}
+.btn-primary{background:var(--navy);color:#fff;flex:1}.btn-primary:hover{background:var(--blue)}
+.btn-outline{background:#fff;color:var(--navy);border:2px solid #e0e8ff}.btn-outline:hover{border-color:var(--navy)}
+</style>
+</head>
+<body>
+<nav>
+  <div class="nb">🎓 <span>SSJCOE</span> Admin</div>
+  <a href="/admin/teachers" class="nl">← Teachers</a>
+</nav>
+<div class="container">
+  <a href="/admin/teachers" class="back">← Back to Teachers</a>
+  <div class="card">
+    <h2>✏️ Edit Teacher</h2>
+    <p>Update teacher account details</p>
+    <form method="POST">
+      <div class="form-group"><label>Full Name</label><input type="text" name="name" value="{{ teacher.name }}" required></div>
+      <div class="form-group"><label>Username</label><input type="text" name="username" value="{{ teacher.username }}" required></div>
+      <div class="form-group"><label>Department</label>
+        <select name="department">
+          <option value="">Select Department</option>
+          {% for d in ['Computer Science','Electronics','Mechanical','Civil','Electrical','Information Technology'] %}
+          <option {% if teacher.department == d %}selected{% endif %}>{{ d }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group"><label>New Password</label>
+        <input type="text" name="password" placeholder="Leave blank to keep current password">
+        <p class="hint">Leave blank to keep the existing password</p>
+      </div>
+      <div class="btn-row">
+        <a href="/admin/teachers" class="btn btn-outline">Cancel</a>
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+      </div>
+    </form>
+  </div>
+</div>
+</body></html>
